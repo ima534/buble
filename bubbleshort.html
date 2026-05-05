@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Bubble Sort</title>
+    <style>
+        :root { --bg: #0b0e14; --panel: #151921; --cyan: #00f2ff; --accent: #7000ff; --text: #e0e6ed; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .ai-card { background: var(--panel); padding: 30px; border-radius: 20px; border: 1px solid rgba(0, 242, 255, 0.2); box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 600px; }
+        .visualizer { display: flex; align-items: flex-end; height: 250px; gap: 8px; margin: 30px 0; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .bar { flex: 1; background: linear-gradient(to top, var(--accent), var(--cyan)); border-radius: 4px 4px 0 0; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; opacity: 0.7; }
+        .bar span { position: absolute; top: -30px; width: 100%; text-align: center; font-size: 12px; color: var(--cyan); }
+        .active { opacity: 1; filter: drop-shadow(0 0 10px var(--cyan)); transform: scaleX(1.1); }
+        .sorted { background: #2ecc71; filter: drop-shadow(0 0 5px #2ecc71); opacity: 0.8; }
+        .controls { display: flex; gap: 15px; margin-top: 20px; }
+        button { background: rgba(0, 242, 255, 0.1); border: 1px solid var(--cyan); color: var(--cyan); padding: 12px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        button:hover { background: var(--cyan); color: var(--bg); box-shadow: 0 0 20px var(--cyan); }
+        .status-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border-left: 4px solid var(--cyan); font-family: 'Courier New', monospace; font-size: 14px; }
+    </style>
+</head>
+<body>
+<div class="ai-card">
+    <h2 style="margin-top:0; color: var(--cyan);">SYSTEM: BUBBLE_SORT.exe</h2>
+    <div class="visualizer" id="visualizer"></div>
+    <div class="status-box" id="statusText">System Ready. Awaiting Command...</div>
+    <div class="controls">
+        <button onclick="reset()">Generate Data</button>
+        <button id="nextBtn" onclick="step()">Execute Step</button>
+    </div>
+</div>
+<script>
+    let data = [], i = 0, j = 0;
+    function reset() {
+        data = Array.from({length: 10}, () => Math.floor(Math.random() * 80) + 20);
+        i = 0; j = 0; render();
+        document.getElementById('statusText').innerText = "> Data terenkripsi. Memulai protokol pengurutan...";
+        document.getElementById('nextBtn').disabled = false;
+    }
+    function render() {
+        const v = document.getElementById('visualizer');
+        v.innerHTML = '';
+        data.forEach((val, idx) => {
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = `${val * 2.5}px`;
+            bar.innerHTML = `<span>${val}</span>`;
+            if (idx === j || idx === j + 1) bar.classList.add('active');
+            if (idx >= data.length - i) bar.classList.add('sorted');
+            v.appendChild(bar);
+        });
+    }
+    function step() {
+        if (i < data.length) {
+            if (j < data.length - i - 1) {
+                let msg = `> Comparing: [${data[j]}] & [${data[j+1]}]`;
+                if (data[j] > data[j+1]) {
+                    msg += " -> Swapping elements...";
+                    [data[j], data[j+1]] = [data[j+1], data[j]];
+                }
+                document.getElementById('statusText').innerText = msg;
+                j++;
+            } else { i++; j = 0; }
+            render();
+        } else {
+            document.getElementById('statusText').innerText = "> Task Completed. Optimization Successful.";
+            document.getElementById('nextBtn').disabled = true;
+        }
+    }
+    reset();
+</script>
+</body>
+</html>
