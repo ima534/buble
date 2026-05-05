@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Bubble Sort Learning Lab</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --secondary: #f39c12;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --bg: #f8f9fa;
+            --text: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 650px;
+            text-align: center;
+        }
+
+        h1 { margin-bottom: 0.5rem; color: var(--primary); }
+        p { color: #7f8c8d; margin-bottom: 1.5rem; }
+
+        .visualizer {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 200px;
+            gap: 8px;
+            margin: 20px 0;
+            padding: 10px;
+            background: #fdfdfd;
+            border-bottom: 3px solid #eee;
+        }
+
+        .bar {
+            flex: 1;
+            background-color: var(--primary);
+            border-radius: 4px 4px 0 0;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            min-width: 30px;
+        }
+
+        .bar span {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .active { background-color: var(--danger) !important; transform: scaleY(1.05); }
+        .sorted { background-color: var(--success) !important; }
+
+        .info-box {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            min-height: 45px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+            background: var(--primary);
+            color: white;
+        }
+
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
+        
+        #speed { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Lab Bubble Sort</h1>
+        <p>Lihat bagaimana elemen besar "menggelembung" ke atas!</p>
+
+        <div class="visualizer" id="container"></div>
+
+        <div class="info-box" id="step-info">
+            Siap untuk memulai eksperimen? Klik tombol di bawah.
+        </div>
+
+        <div class="controls">
+            <button id="startBtn" onclick="bubbleSort()">Mulai Pengurutan</button>
+            <button onclick="resetData()">Acak Data Baru</button>
+            <div style="display: flex; align-items: center; gap: 5px; margin-left: 10px;">
+                <small>Lambat</small>
+                <input type="range" id="speed" min="100" max="1000" value="500" dir="rtl">
+                <small>Cepat</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let data = [40, 10, 30, 20, 50, 5];
+        const container = document.getElementById('container');
+        const info = document.getElementById('step-info');
+        const speedInput = document.getElementById('speed');
+        const startBtn = document.getElementById('startBtn');
+
+        function render(active = [], done = 0) {
+            container.innerHTML = '';
+            data.forEach((val, i) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${val * 2.5}px`;
+                
+                if (active.includes(i)) bar.classList.add('active');
+                if (i >= data.length - done) bar.classList.add('sorted');
+                
+                bar.innerHTML = `<span>${val}</span>`;
+                container.appendChild(bar);
+            });
+        }
+
+        function resetData() {
+            data = Array.from({length: 8}, () => Math.floor(Math.random() * 60) + 5);
+            info.innerText = "Data diacak! Tekan 'Mulai' untuk belajar.";
+            startBtn.disabled = false;
+            render();
+        }
+
+        const sleep = () => new Promise(r => setTimeout(r, 1100 - speedInput.value));
+
+        async function bubbleSort() {
+            startBtn.disabled = true;
+            let n = data.length;
+
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n - i - 1; j++) {
+                    // Tahap Membandingkan
+                    info.innerHTML = `🔎 Membandingkan <b>${data[j]}</b> dan <b>${data[j+1]}</b>...`;
+                    render([j, j+1], i);
+                    await sleep();
+
+                    if (data[j] > data[j+1]) {
+                        info.innerHTML = `🔄 <b>${data[j]} > ${data[j+1]}</b>, tukar posisi!`;
+                        [data[j], data[j+1]] = [data[j+1], data[j]];
+                        render([j, j+1], i);
+                        await sleep();
+                    } else {
+                        info.innerHTML = `✅ <b>${data[j]}</b> tidak lebih besar, tetap di posisi.`;
+                        await sleep();
+                    }
+                }
+                info.innerHTML = `🚩 Angka <b>${data[n-i-1]}</b> sekarang sudah di posisi yang benar.`;
+                render([], i + 1);
+                await sleep();
+            }
+            info.innerHTML = "✨ <b>Selesai!</b> Semua elemen sudah terurut dari terkecil ke terbesar.";
+        }
+
+        render();
+    </script>
+</body>
+</html>
